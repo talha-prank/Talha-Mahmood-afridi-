@@ -24,7 +24,6 @@ export const Contact: React.FC<ContactProps> = ({ selectedServicePreset, onOpenA
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    whatsapp: '',
     message: ''
   });
 
@@ -57,73 +56,31 @@ export const Contact: React.FC<ContactProps> = ({ selectedServicePreset, onOpenA
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validation
-    if (!formData.name.trim()) {
-      setErrorMsg('Please enter your full name.');
-      return;
-    }
-    if (!formData.email.trim() || !formData.email.includes('@')) {
-      setErrorMsg('Please provide a valid email address.');
-      return;
-    }
-    if (!formData.whatsapp.trim()) {
-      setErrorMsg('Please provide your WhatsApp number.');
-      return;
-    }
-    if (!formData.message.trim() || formData.message.length < 5) {
-      setErrorMsg('Please write your message or project requirements.');
-      return;
-    }
-
     setIsSubmitting(true);
     setErrorMsg('');
 
     try {
-      const response = await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to submit message to server.');
+      const data = await res.json();
+      if (data.success) {
+        try {
+          alert('Message Sent Successfully!');
+        } catch {
+          // safe fallback for restricted sandbox iframe
+        }
+        setShowToast(true);
+        setIsSubmitted(true);
+        setFormData({ name: '', email: '', message: '' });
+        setTimeout(() => setShowToast(false), 5000);
+      } else {
+        setErrorMsg(data.error || 'Failed to submit message.');
       }
-
-      // Also cache in local storage for instant view
-      try {
-        const existing = JSON.parse(localStorage.getItem('tma_portfolio_inquiries') || '[]');
-        const newEntry = {
-          id: result.data?._id || result.contact?.id || Date.now(),
-          date: new Date().toISOString(),
-          ...formData
-        };
-        localStorage.setItem('tma_portfolio_inquiries', JSON.stringify([newEntry, ...existing]));
-      } catch {}
-
-      setShowToast(true);
-      setIsSubmitted(true);
-      setTimeout(() => setShowToast(false), 5000);
     } catch (err: any) {
-      console.warn('Backend /api/contact note:', err.message);
-      // Fallback cache so user never experiences data loss
-      try {
-        const existing = JSON.parse(localStorage.getItem('tma_portfolio_inquiries') || '[]');
-        const newEntry = {
-          id: Date.now(),
-          date: new Date().toISOString(),
-          ...formData
-        };
-        localStorage.setItem('tma_portfolio_inquiries', JSON.stringify([newEntry, ...existing]));
-      } catch {}
-
-      setShowToast(true);
-      setIsSubmitted(true);
-      setTimeout(() => setShowToast(false), 5000);
+      setErrorMsg(err?.message || 'Error submitting message.');
     } finally {
       setIsSubmitting(false);
     }
@@ -131,7 +88,7 @@ export const Contact: React.FC<ContactProps> = ({ selectedServicePreset, onOpenA
 
   const handleSendViaWhatsApp = () => {
     const text = encodeURIComponent(
-      `Hi Talha,\n\nMy name is ${formData.name || 'a visitor'}.\nEmail: ${formData.email}\nWhatsApp: ${formData.whatsapp}\n\nMessage: ${formData.message}`
+      `Hi Talha,\n\nMy name is ${formData.name || 'a visitor'}.\nEmail: ${formData.email}\n\nMessage: ${formData.message}`
     );
     window.open(`https://wa.me/923255691055?text=${text}`, '_blank');
   };
@@ -139,7 +96,7 @@ export const Contact: React.FC<ContactProps> = ({ selectedServicePreset, onOpenA
   const handleSendViaEmail = () => {
     const subject = encodeURIComponent(`Portfolio Inquiry from ${formData.name}`);
     const body = encodeURIComponent(
-      `Hello Talha,\n\nName: ${formData.name}\nWhatsApp: ${formData.whatsapp}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+      `Hello Talha,\n\nName: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
     );
     window.location.href = `mailto:${PERSONAL_INFO.email}?subject=${subject}&body=${body}`;
   };
@@ -340,7 +297,6 @@ END:VCARD`;
                         setFormData({
                           name: '',
                           email: '',
-                          whatsapp: '',
                           message: ''
                         });
                       }}
@@ -411,22 +367,6 @@ END:VCARD`;
                         className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-white transition-colors"
                       />
                     </div>
-                  </div>
-
-                  {/* WhatsApp Number */}
-                  <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                      WhatsApp Number <span className="text-rose-400">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="whatsapp"
-                      value={formData.whatsapp}
-                      onChange={handleChange}
-                      placeholder="e.g. +923255691055 or 03255691055"
-                      required
-                      className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-white transition-colors font-mono"
-                    />
                   </div>
 
                   {/* Message */}
