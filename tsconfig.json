@@ -28,6 +28,7 @@
     "lib",
     "models",
     "app",
-    "src/app"
+    "src/app",
+    "api"
   ]
 }

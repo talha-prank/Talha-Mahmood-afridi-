@@ -35,8 +35,22 @@ export const Contact: React.FC<ContactProps> = ({ onOpenAdmin }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      const data = await res.json();
-      if (data.success) {
+
+      const rawText = await res.text();
+      let data: any = null;
+
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        if (rawText.trim().startsWith('<') || res.status === 404) {
+          throw new Error(
+            `Endpoint returned HTML (Status ${res.status}). The /api/contact route was not found on this deployment. Please verify that 'api/contact.js' and 'vercel.json' are pushed to your repository and that MONGODB_URI is set in Vercel settings.`
+          );
+        }
+        throw new Error(`Invalid response received from server (${res.status}): ${rawText.slice(0, 120)}`);
+      }
+
+      if (res.ok && (data.success || data.id || data.saved)) {
         try {
           alert('Message Sent Successfully!');
         } catch {
@@ -47,9 +61,10 @@ export const Contact: React.FC<ContactProps> = ({ onOpenAdmin }) => {
         setFormData({ name: '', email: '', message: '' });
         setTimeout(() => setShowToast(false), 5000);
       } else {
-        setErrorMsg(data.error || 'Failed to submit message.');
+        setErrorMsg(data.error || data.message || 'Failed to submit message to database.');
       }
     } catch (err: any) {
+      console.error('Contact submit error:', err);
       setErrorMsg(err?.message || 'Error submitting message.');
     } finally {
       setIsSubmitting(false);
