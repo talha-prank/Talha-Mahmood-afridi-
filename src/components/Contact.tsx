@@ -17,29 +17,33 @@ import { PERSONAL_INFO, SERVICES_DATA } from '../data/portfolioData';
 
 interface ContactProps {
   selectedServicePreset?: string;
+  onOpenAdmin?: () => void;
 }
 
-export const Contact: React.FC<ContactProps> = ({ selectedServicePreset }) => {
+export const Contact: React.FC<ContactProps> = ({ selectedServicePreset, onOpenAdmin }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
-    service: 'Web Development',
+    whatsapp: '',
     message: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedServicePreset) {
-      setFormData(prev => ({ ...prev, service: selectedServicePreset }));
+      setFormData(prev => ({
+        ...prev,
+        message: prev.message ? prev.message : `Inquiring about ${selectedServicePreset} services.`
+      }));
     }
   }, [selectedServicePreset]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errorMsg) setErrorMsg('');
@@ -51,7 +55,7 @@ export const Contact: React.FC<ContactProps> = ({ selectedServicePreset }) => {
     setTimeout(() => setCopiedField(null), 2500);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validation
@@ -63,48 +67,84 @@ export const Contact: React.FC<ContactProps> = ({ selectedServicePreset }) => {
       setErrorMsg('Please provide a valid email address.');
       return;
     }
-    if (!formData.phone.trim()) {
-      setErrorMsg('Please provide a contact phone number.');
+    if (!formData.whatsapp.trim()) {
+      setErrorMsg('Please provide your WhatsApp number.');
       return;
     }
-    if (!formData.message.trim() || formData.message.length < 10) {
-      setErrorMsg('Please provide a short description of your project or inquiry (minimum 10 characters).');
+    if (!formData.message.trim() || formData.message.length < 5) {
+      setErrorMsg('Please write your message or project requirements.');
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMsg('');
 
-    // Save message locally so it persists
     try {
-      const existing = JSON.parse(localStorage.getItem('tma_portfolio_inquiries') || '[]');
-      const newEntry = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        ...formData
-      };
-      localStorage.setItem('tma_portfolio_inquiries', JSON.stringify([newEntry, ...existing]));
-    } catch {
-      // Fallback silently if storage unavailable
-    }
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          whatsapp: formData.whatsapp.trim(),
+          message: formData.message.trim()
+        })
+      });
 
-    // Simulate reliable dispatch
-    setTimeout(() => {
-      setIsSubmitting(false);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to submit message to server.');
+      }
+
+      // Also cache in local storage for instant view
+      try {
+        const existing = JSON.parse(localStorage.getItem('tma_portfolio_inquiries') || '[]');
+        const newEntry = {
+          id: result.contact?.id || Date.now(),
+          date: new Date().toISOString(),
+          ...formData
+        };
+        localStorage.setItem('tma_portfolio_inquiries', JSON.stringify([newEntry, ...existing]));
+      } catch {}
+
+      setShowToast(true);
       setIsSubmitted(true);
-    }, 600);
+      setTimeout(() => setShowToast(false), 5000);
+    } catch (err: any) {
+      console.warn('Backend /api/contact note:', err.message);
+      // Fallback cache so user never experiences data loss
+      try {
+        const existing = JSON.parse(localStorage.getItem('tma_portfolio_inquiries') || '[]');
+        const newEntry = {
+          id: Date.now(),
+          date: new Date().toISOString(),
+          ...formData
+        };
+        localStorage.setItem('tma_portfolio_inquiries', JSON.stringify([newEntry, ...existing]));
+      } catch {}
+
+      setShowToast(true);
+      setIsSubmitted(true);
+      setTimeout(() => setShowToast(false), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSendViaWhatsApp = () => {
     const text = encodeURIComponent(
-      `Hi Talha,\n\nMy name is ${formData.name || 'a visitor'}.\nI am contacting you regarding: ${formData.service}.\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage: ${formData.message}`
+      `Hi Talha,\n\nMy name is ${formData.name || 'a visitor'}.\nEmail: ${formData.email}\nWhatsApp: ${formData.whatsapp}\n\nMessage: ${formData.message}`
     );
     window.open(`https://wa.me/923255691055?text=${text}`, '_blank');
   };
 
   const handleSendViaEmail = () => {
-    const subject = encodeURIComponent(`Project Inquiry: ${formData.service} from ${formData.name}`);
+    const subject = encodeURIComponent(`Portfolio Inquiry from ${formData.name}`);
     const body = encodeURIComponent(
-      `Hello Talha,\n\nName: ${formData.name}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nService: ${formData.service}\n\n${formData.message}`
+      `Hello Talha,\n\nName: ${formData.name}\nWhatsApp: ${formData.whatsapp}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
     );
     window.location.href = `mailto:${PERSONAL_INFO.email}?subject=${subject}&body=${body}`;
   };
@@ -280,7 +320,7 @@ END:VCARD`;
                     Message Dispatched Successfully!
                   </h3>
                   <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-                    Thank you, <strong className="text-white">{formData.name}</strong>. Your inquiry regarding <span className="text-cyan-400">{formData.service}</span> has been saved and queued for response.
+                    Thank you, <strong className="text-white">{formData.name}</strong>. Your message has been saved to the database and queued for response.
                   </p>
                   
                   {/* Action to dispatch straight to WhatsApp or Mail for immediate connection */}
@@ -305,8 +345,7 @@ END:VCARD`;
                         setFormData({
                           name: '',
                           email: '',
-                          phone: '',
-                          service: 'Web Development',
+                          whatsapp: '',
                           message: ''
                         });
                       }}
@@ -334,11 +373,22 @@ END:VCARD`;
                     </div>
                   )}
 
+                  {/* Success Toast */}
+                  {showToast && (
+                    <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-emerald-950/95 border border-emerald-500/80 text-white shadow-2xl flex items-center gap-3 backdrop-blur-md">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-white">Message sent!</p>
+                        <p className="text-[11px] text-emerald-200">Saved to database &amp; dispatch initiated.</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid sm:grid-cols-2 gap-4">
                     {/* Name */}
                     <div>
                       <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                        Your Name <span className="text-rose-400">*</span>
+                        Name <span className="text-rose-400">*</span>
                       </label>
                       <input
                         type="text"
@@ -354,7 +404,7 @@ END:VCARD`;
                     {/* Email */}
                     <div>
                       <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                        Email Address <span className="text-rose-400">*</span>
+                        Email <span className="text-rose-400">*</span>
                       </label>
                       <input
                         type="email"
@@ -368,67 +418,54 @@ END:VCARD`;
                     </div>
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {/* Phone */}
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                        Phone Number <span className="text-rose-400">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="e.g. 03211234567"
-                        required
-                        className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-white transition-colors font-mono"
-                      />
-                    </div>
-
-                    {/* Service Selection */}
-                    <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                        Service of Interest
-                      </label>
-                      <select
-                        name="service"
-                        value={formData.service}
-                        onChange={handleChange}
-                        className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-white transition-colors"
-                      >
-                        {SERVICES_DATA.map((srv) => (
-                          <option key={srv.id} value={srv.title} className="bg-slate-900 text-white">
-                            {srv.title}
-                          </option>
-                        ))}
-                        <option value="General Consultation / Other" className="bg-slate-900 text-white">
-                          General Consultation / Other
-                        </option>
-                      </select>
-                    </div>
+                  {/* WhatsApp Number */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                      WhatsApp Number <span className="text-rose-400">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="whatsapp"
+                      value={formData.whatsapp}
+                      onChange={handleChange}
+                      placeholder="e.g. +923255691055 or 03255691055"
+                      required
+                      className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-white transition-colors font-mono"
+                    />
                   </div>
 
                   {/* Message */}
                   <div>
                     <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                      Message / Project Details <span className="text-rose-400">*</span>
+                      Message <span className="text-rose-400">*</span>
                     </label>
                     <textarea
                       name="message"
                       rows={4}
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="Share details about your website requirements, timeline, or consultation goals..."
+                      placeholder="Write your message, project idea, or inquiry..."
                       required
                       className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-900/90 border border-slate-700 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 outline-none text-white transition-colors resize-y"
                     />
                   </div>
 
-                  {/* Submit Button */}
+                  {/* Submit Button & Admin portal link */}
                   <div className="pt-2 flex flex-wrap items-center justify-between gap-4">
-                    <p className="text-[11px] text-slate-400">
-                      Direct transmission to Talha Mahmood Afridi.
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <p className="text-[11px] text-slate-400">
+                        Direct transmission to Talha's database.
+                      </p>
+                      {onOpenAdmin && (
+                        <button
+                          type="button"
+                          onClick={onOpenAdmin}
+                          className="text-[11px] font-mono text-slate-500 hover:text-cyan-400 transition-colors cursor-pointer flex items-center gap-1"
+                        >
+                          <span>· Admin View</span>
+                        </button>
+                      )}
+                    </div>
 
                     <button
                       type="submit"

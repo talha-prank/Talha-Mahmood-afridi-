@@ -13,9 +13,10 @@ import { PERSONAL_INFO } from '../data/portfolioData';
 
 interface FooterProps {
   onOpenCV: () => void;
+  onOpenAdmin?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenCV }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenCV, onOpenAdmin }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -143,6 +144,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenCV }) => {
           <p>© 2026 Talha Mahmood Afridi. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span>UET Peshawar · Computer Science</span>
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                className="text-slate-400 hover:text-cyan-400 font-mono transition-colors cursor-pointer"
+              >
+                Admin (admin123)
+              </button>
+            )}
             <button
               onClick={scrollToTop}
               className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors cursor-pointer"
