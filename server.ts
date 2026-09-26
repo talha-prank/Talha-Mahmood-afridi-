@@ -193,60 +193,52 @@ app.get('/api/health', (req, res) => {
 // 2. POST /api/contact - Submit contact form
 app.post('/api/contact', async (req, res) => {
   try {
-    const { name, email, whatsapp, message } = req.body;
+    const { name, email, message, whatsapp } = req.body;
 
-    if (!name || !email || !whatsapp || !message) {
+    if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
-        error: 'All fields (name, email, whatsapp, message) are required.',
+        error: 'Name, email, and message are required.',
       });
     }
+
+    const contactData = {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      whatsapp: whatsapp ? whatsapp.trim() : '',
+      message: message.trim(),
+      createdAt: new Date(),
+    };
 
     let savedContact: any = null;
 
     if (isMongoConnected && ContactModel) {
-      const newDoc = new ContactModel({
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        whatsapp: whatsapp.trim(),
-        message: message.trim(),
-        createdAt: new Date(),
-      });
+      const newDoc = new ContactModel(contactData);
       savedContact = await newDoc.save();
     } else {
       savedContact = {
         _id: 'local_' + Date.now(),
         id: 'local_' + Date.now(),
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        whatsapp: whatsapp.trim(),
-        message: message.trim(),
-        createdAt: new Date(),
+        ...contactData,
       };
       inMemoryContacts.unshift(savedContact);
     }
 
-    // Trigger notifications asynchronously
-    sendEmailNotification({ name, email, whatsapp, message }).catch(() => {});
-    sendTwilioWhatsApp({ name, email, whatsapp, message }).catch(() => {});
+    // Trigger notifications asynchronously if configured
+    sendEmailNotification({ name, email, whatsapp: contactData.whatsapp, message }).catch(() => {});
+    sendTwilioWhatsApp({ name, email, whatsapp: contactData.whatsapp, message }).catch(() => {});
 
     return res.status(201).json({
       success: true,
-      message: 'Message sent!',
-      contact: {
-        id: savedContact._id || savedContact.id,
-        name: savedContact.name,
-        email: savedContact.email,
-        whatsapp: savedContact.whatsapp,
-        message: savedContact.message,
-        createdAt: savedContact.createdAt,
-      },
+      message: 'Message Sent Successfully!',
+      data: savedContact,
+      contact: savedContact,
     });
   } catch (error: any) {
     console.error('[API /api/contact] Error processing submission:', error);
     return res.status(500).json({
       success: false,
-      error: 'An internal error occurred while saving your message.',
+      error: error?.message || 'An internal error occurred while saving your message.',
     });
   }
 });
