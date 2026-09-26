@@ -1,135 +1,126 @@
-import React from 'react';
-import { PROJECTS_DATA, ProjectItem } from '../data/portfolioData';
-import { ExternalLink, Github, Layers, ArrowUpRight, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { PROJECTS, Project } from '../data/portfolioData';
+import { ExternalLink, Github, ArrowRight, Layers } from 'lucide-react';
 
 interface ProjectsProps {
-  onSelectProject: (project: ProjectItem) => void;
+  onSelectProject: (project: Project) => void;
 }
 
 export const Projects: React.FC<ProjectsProps> = ({ onSelectProject }) => {
+  const [activeFilter, setActiveFilter] = useState<string>('All');
+  const categories = ['All', 'Full-Stack', 'Desktop / System', 'Embedded / IoT'];
+
+  const filteredProjects = activeFilter === 'All'
+    ? PROJECTS
+    : PROJECTS.filter(p => p.category === activeFilter);
+
   return (
-    <section id="projects" className="py-20 lg:py-28 relative">
+    <section id="projects" className="py-20 bg-slate-950/70 relative border-t border-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-          <div className="max-w-2xl">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div>
             <div className="text-xs font-mono uppercase tracking-wider text-cyan-400 mb-2">
-              05. Selected Works &amp; Engineering Lab
+              03. Proven Work
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white font-heading">
               Featured Projects
             </h2>
-            <p className="text-base sm:text-lg text-slate-400 mt-2">
-              A curated selection of software applications, web platforms, database systems, and hardware prototypes.
+            <p className="text-base text-slate-400 mt-2 max-w-xl">
+              From full-stack web applications to systems programming and hardware microcontrollers.
             </p>
           </div>
-          <div className="text-xs font-mono text-slate-400 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 self-start md:self-auto">
-            Showing 6 Technical Projects
+
+          {/* Filter Tabs */}
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveFilter(cat)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                  activeFilter === cat
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                    : 'bg-slate-900/60 text-slate-400 border border-slate-800 hover:text-white'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Project Cards Bento / Masonry Grid */}
+        {/* Project Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {PROJECTS_DATA.map((project, index) => (
+          {filteredProjects.map((project) => (
             <div
               key={project.id}
-              className="glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-cyan-500/40 transition-all duration-300 flex flex-col justify-between group"
+              className="group rounded-2xl bg-slate-900/70 border border-slate-800/80 hover:border-cyan-500/40 transition-all duration-300 flex flex-col overflow-hidden shadow-xl hover:-translate-y-1"
             >
-              <div>
-                {/* Visual Thumbnail with Fallback */}
-                <div 
-                  className="relative aspect-[16/10] overflow-hidden bg-slate-900 cursor-pointer"
-                  onClick={() => onSelectProject(project)}
-                >
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.innerHTML = `
-                          <div class="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-950 text-center">
-                            <span class="text-3xl mb-1">⚡</span>
-                            <span class="text-xs font-mono text-cyan-400">${project.category}</span>
-                            <h4 class="text-sm font-semibold text-white mt-1">${project.title}</h4>
-                          </div>
-                        `;
-                      }
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none" />
-                  
-                  {/* Category Pill */}
-                  <div className="absolute bottom-3 left-3 text-[11px] font-mono text-cyan-300 bg-slate-950/80 backdrop-blur-sm px-2.5 py-0.5 rounded border border-slate-700/60">
-                    {project.category}
-                  </div>
-                </div>
+              {/* Image Preview */}
+              <div className="relative h-48 w-full overflow-hidden bg-slate-950">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-mono font-medium bg-slate-900/80 backdrop-blur-md border border-slate-700 text-cyan-300">
+                  {project.category}
+                </span>
+              </div>
 
-                {/* Content Area */}
-                <div className="p-6">
-                  <h3 
-                    onClick={() => onSelectProject(project)}
-                    className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors cursor-pointer flex items-center justify-between"
-                  >
-                    <span>{project.title}</span>
-                    <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+              {/* Body */}
+              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors">
+                    {project.title}
                   </h3>
-
-                  <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed line-clamp-3">
-                    {project.shortDescription}
+                  <p className="text-xs sm:text-sm text-slate-400 line-clamp-3 leading-relaxed">
+                    {project.shortDesc}
                   </p>
+                </div>
 
-                  {/* Key Highlights list */}
-                  <div className="mt-3 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-slate-400">
-                    {project.highlights.map((h, hIdx) => (
-                      <span key={hIdx} className="text-cyan-400/90 font-mono">
-                        ✓ {h}
-                      </span>
-                    ))}
-                  </div>
+                {/* Tech Pills */}
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  {project.techStack.map((tech, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-0.5 rounded text-[11px] font-mono bg-slate-800/90 text-slate-300 border border-slate-700/60"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
 
-                  {/* Zero-Pill Tech Metadata */}
-                  <div className="mt-4 pt-3 border-t border-slate-800/80">
-                    <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400">
-                      {project.technologies.map((tech, idx) => (
-                        <React.Fragment key={tech}>
-                          <span className="font-mono text-slate-300">{tech}</span>
-                          {idx < project.technologies.length - 1 && (
-                            <span className="text-slate-600" aria-hidden="true">·</span>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </div>
+                {/* Footer Action */}
+                <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+                  <button
+                    onClick={() => onSelectProject(project)}
+                    className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>View Architecture</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  {project.githubUrl && (
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                      aria-label="GitHub Repository"
+                    >
+                      <Github className="w-4 h-4" />
+                    </a>
+                  )}
                 </div>
               </div>
 
-              {/* Action Buttons (Real working modals / controls) */}
-              <div className="p-6 pt-0 flex items-center gap-3">
-                <button
-                  onClick={() => onSelectProject(project)}
-                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-500 rounded-lg transition-colors cursor-pointer"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Live Demo &amp; Details</span>
-                </button>
-
-                <button
-                  onClick={() => onSelectProject(project)}
-                  className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-lg transition-colors cursor-pointer"
-                  title="Inspect Source Code Architecture"
-                >
-                  <Github className="w-3.5 h-3.5" />
-                  <span>GitHub</span>
-                </button>
-              </div>
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );
