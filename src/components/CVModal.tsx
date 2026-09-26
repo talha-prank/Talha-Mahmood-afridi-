@@ -86,19 +86,29 @@ ${PROJECTS.map(p => `- ${p.title} (${p.category}): ${p.shortDesc} [Tech: ${p.tec
         <div className="p-8 space-y-6 overflow-y-auto font-sans text-slate-300 text-xs sm:text-sm">
           
           {/* Header section */}
-          <div className="border-b border-slate-800 pb-5">
-            <h2 className="text-2xl font-bold text-white tracking-tight">
-              {PERSONAL_INFO.name}
-            </h2>
-            <p className="text-sm font-medium text-cyan-400 mt-0.5">
-              {PERSONAL_INFO.title}
-            </p>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-slate-400 text-xs mt-2 font-mono">
-              <span>{PERSONAL_INFO.location}</span>
-              <span>•</span>
-              <span>{PERSONAL_INFO.email}</span>
-              <span>•</span>
-              <span>{PERSONAL_INFO.whatsappDisplay}</span>
+          <div className="border-b border-slate-800 pb-5 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">
+                {PERSONAL_INFO.name}
+              </h2>
+              <p className="text-sm font-medium text-cyan-400 mt-0.5">
+                {PERSONAL_INFO.title}
+              </p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-slate-400 text-xs mt-2 font-mono">
+                <span>{PERSONAL_INFO.location}</span>
+                <span>•</span>
+                <span>{PERSONAL_INFO.email}</span>
+                <span>•</span>
+                <span>{PERSONAL_INFO.whatsappDisplay}</span>
+              </div>
+            </div>
+
+            <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-700 shrink-0 hidden sm:block shadow-md">
+              <img
+                src={PERSONAL_INFO.profileImage || '/profile.jpg'}
+                alt={PERSONAL_INFO.name}
+                className="w-full h-full object-cover object-[center_15%]"
+              />
             </div>
           </div>
 

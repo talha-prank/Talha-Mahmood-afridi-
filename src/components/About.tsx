@@ -23,22 +23,55 @@ export const About: React.FC = () => {
         {/* Grid */}
         <div className="grid lg:grid-cols-12 gap-10 items-center">
           
-          <div className="lg:col-span-7 space-y-5 text-sm sm:text-base text-slate-300 leading-relaxed">
-            <p>
-              I am a Computer Science student at the prestigious <span className="text-white font-semibold">University of Engineering and Technology (UET), Peshawar</span>, with an intensive focus on web architecture, database design, and systems programming.
-            </p>
-            <p>
-              My coding journey combines foundational computer science principles—Data Structures, Algorithms, Object-Oriented Design—with modern technologies like <span className="text-cyan-300">Next.js, React, Node.js, and MongoDB</span>.
-            </p>
-            <p>
-              Whether structuring MongoDB document schemas, creating responsive user interfaces with Tailwind CSS, or wiring microcontroller circuits, I thrive on turning complex problems into elegant solutions.
-            </p>
+          {/* Photo & Identity Showcase */}
+          <div className="lg:col-span-4 flex justify-center">
+            <div className="relative group w-full max-w-sm">
+              <div className="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-cyan-500/30 via-teal-500/20 to-blue-600/30 blur-xl opacity-80 group-hover:opacity-100 transition duration-500" />
+              <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl">
+                <img
+                  src="/talha_outdoor.jpg"
+                  alt="Talha Mahmood Afridi"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/profile.jpg';
+                  }}
+                  className="w-full h-84 sm:h-96 object-cover object-top transition duration-500 group-hover:scale-102"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+                <div className="absolute bottom-0 inset-x-0 p-5">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 backdrop-blur-md mb-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Talha Mahmood Afridi</span>
+                  </div>
+                  <h4 className="text-white font-heading font-bold text-base">
+                    UET Peshawar &bull; CS Student
+                  </h4>
+                  <p className="text-xs text-slate-300 mt-0.5">
+                    Full-Stack Web Developer &bull; Peshawar, Pakistan
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Narrative and Highlights */}
+          <div className="lg:col-span-8 space-y-6">
+            <div className="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed">
+              <p>
+                I am a Computer Science student at the prestigious <span className="text-white font-semibold">University of Engineering and Technology (UET), Peshawar</span>, with an intensive focus on web architecture, database design, and systems programming.
+              </p>
+              <p>
+                My coding journey combines foundational computer science principles—Data Structures, Algorithms, Object-Oriented Design—with modern technologies like <span className="text-cyan-300">Next.js, React, Node.js, and MongoDB</span>.
+              </p>
+              <p>
+                Whether structuring MongoDB document schemas, creating responsive user interfaces with Tailwind CSS, or wiring microcontroller circuits, I thrive on turning complex problems into elegant solutions.
+              </p>
+            </div>
 
             {/* Core Values */}
-            <div className="grid sm:grid-cols-2 gap-3 pt-3">
+            <div className="grid sm:grid-cols-2 gap-3 pt-2">
               {[
                 "Clean, typed code with TypeScript",
-                "Full-Stack API & Database integration",
+                "Full-Stack API & MongoDB Atlas integration",
                 "Performance-first responsive UIs",
                 "Proactive communication & collaboration",
               ].map((item, i) => (
@@ -48,47 +81,48 @@ export const About: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="lg:col-span-5 grid sm:grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-3">
-                <GraduationCap className="w-5 h-5" />
+            {/* 4 Feature Badges */}
+            <div className="grid sm:grid-cols-2 gap-3.5 pt-2">
+              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="w-9 h-9 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-2.5">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <h3 className="font-semibold text-white text-xs sm:text-sm mb-0.5">Education</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  BS Computer Science at UET Peshawar (2023 - Present)
+                </p>
               </div>
-              <h3 className="font-semibold text-white text-sm mb-1">Education</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                BS Computer Science at UET Peshawar (2023 - Present)
-              </p>
-            </div>
 
-            <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-3">
-                <Code2 className="w-5 h-5" />
+              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 mb-2.5">
+                  <Code2 className="w-4 h-4" />
+                </div>
+                <h3 className="font-semibold text-white text-xs sm:text-sm mb-0.5">Web Engineering</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Full-Stack Next.js, React, Node.js, &amp; REST APIs
+                </p>
               </div>
-              <h3 className="font-semibold text-white text-sm mb-1">Web Engineering</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Full-Stack Next.js, React, Node.js, &amp; REST APIs
-              </p>
-            </div>
 
-            <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-3">
-                <Database className="w-5 h-5" />
+              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-2.5">
+                  <Database className="w-4 h-4" />
+                </div>
+                <h3 className="font-semibold text-white text-xs sm:text-sm mb-0.5">Databases</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  MongoDB Atlas, Mongoose, SQL schemas &amp; CRUD logic
+                </p>
               </div>
-              <h3 className="font-semibold text-white text-sm mb-1">Databases</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                MongoDB Atlas, Mongoose, SQL schemas &amp; CRUD logic
-              </p>
-            </div>
 
-            <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-3">
-                <Compass className="w-5 h-5" />
+              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 mb-2.5">
+                  <Compass className="w-4 h-4" />
+                </div>
+                <h3 className="font-semibold text-white text-xs sm:text-sm mb-0.5">Location &amp; Remote</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Peshawar, KP, Pakistan — available for remote work globally
+                </p>
               </div>
-              <h3 className="font-semibold text-white text-sm mb-1">Location</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Peshawar, KP, Pakistan — available for remote work globally
-              </p>
             </div>
           </div>
 

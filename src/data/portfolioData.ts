@@ -28,6 +28,7 @@ export const PERSONAL_INFO = {
   whatsappDisplay: "+92 325 5691055",
   github: "https://github.com/talha-mahmood-afridi",
   linkedin: "https://www.linkedin.com/in/talha-mahmood-afridi",
+  profileImage: "/profile.jpg",
   bio: "Passionate Computer Science student at UET Peshawar specializing in modern full-stack web applications, scalable database systems, and interactive digital experiences. Dedicated to writing clean, maintainable code and solving real-world challenges.",
 };
 
