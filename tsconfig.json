@@ -30,6 +30,7 @@
     "nextjs-export",
     "lib",
     "models",
-    "app"
+    "app",
+    "src/app"
   ]
 }

@@ -190,7 +190,12 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 2. POST /api/contact - Submit contact form
+// 2. GET /api/contact - Health verification endpoint
+app.get('/api/contact', (req, res) => {
+  res.json({ status: 'API WORKING - POST to this endpoint' });
+});
+
+// 3. POST /api/contact - Submit contact form
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, message, whatsapp } = req.body;
@@ -231,6 +236,7 @@ app.post('/api/contact', async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'Message Sent Successfully!',
+      saved: savedContact,
       data: savedContact,
       contact: savedContact,
     });
